@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lantern AI — Content Calendar</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #0F1117;
+    --surface: #1A1D2E;
+    --surface2: #242840;
+    --border: #2E3348;
+    --text: #E8E8ED;
+    --text-muted: #8B8FA3;
+    --accent: #6C63FF;
+    --accent-light: #8B84FF;
+    --thomas: #3B82F6;
+    --justin: #10B981;
+    --herman: #F59E0B;
+    --manisha: #A855F7;
+    --company: #EF4444;
+    --thomas-bg: rgba(59,130,246,0.12);
+    --justin-bg: rgba(16,185,129,0.12);
+    --herman-bg: rgba(245,158,11,0.12);
+    --manisha-bg: rgba(168,85,247,0.12);
+    --company-bg: rgba(239,68,68,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo {
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), #A78BFA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .logo-sub { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { background: var(--border); }
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent-light); }
+
+  /* ── Upload Screen ── */
+  .upload-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 65px);
+    gap: 24px;
+  }
+  .upload-zone {
+    width: 480px;
+    padding: 60px 40px;
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface);
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.05);
+  }
+  .upload-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.6; }
+  .upload-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .upload-sub { font-size: 13px; color: var(--text-muted); }
+
+  /* ── Calendar Layout ── */
+  .app { display: none; }
+  .app.active { display: flex; flex-direction: column; min-height: calc(100vh - 65px); }
+
+  /* Month Nav */
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .month-nav h2 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .month-controls { display: flex; gap: 8px; }
+  .nav-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover { background: var(--border); }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    gap: 8px;
+    padding: 12px 32px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .filter-chip.active {
+    color: #fff;
+    border-color: transparent;
+  }
+  .filter-chip[data-account="Thomas"].active { background: var(--thomas); }
+  .filter-chip[data-account="Justin"].active { background: var(--justin); }
+  .filter-chip[data-account="Herman"].active { background: var(--herman); }
+  .filter-chip[data-account="Manisha"].active { background: var(--manisha); }
+  .filter-chip[data-account="Company"].active { background: var(--company); }
+  .filter-chip[data-account="all"].active { background: var(--accent); }
+  .filter-chip[data-platform="X"].active { background: #1DA1F2; }
+  .filter-chip[data-platform="LinkedIn"].active { background: #0A66C2; }
+  .filter-chip[data-platform="all"].active { background: var(--accent); }
+  .filter-divider { width: 1px; background: var(--border); margin: 0 4px; }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 24px;
+    padding: 10px 32px;
+    background: rgba(108,99,255,0.04);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .stat-item span { font-weight: 600; color: var(--text); }
+
+  /* Calendar Grid */
+  .calendar-container {
+    flex: 1;
+    padding: 24px 32px;
+    overflow-y: auto;
+  }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .day-header {
+    background: var(--surface2);
+    padding: 10px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .day-cell {
+    background: var(--surface);
+    min-height: 120px;
+    padding: 8px;
+    position: relative;
+    transition: background 0.15s;
+  }
+  .day-cell:hover { background: var(--surface2); }
+  .day-cell.other-month { opacity: 0.3; }
+  .day-cell.today { box-shadow: inset 0 0 0 2px var(--accent); }
+  .day-number {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .day-cell.today .day-number {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* Post cards in cells */
+  .post-card {
+    padding: 5px 8px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1.4;
+    border-left: 3px solid;
+    transition: all 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .post-card:hover { transform: translateX(2px); filter: brightness(1.1); }
+  .post-card[data-account="Thomas"] { background: var(--thomas-bg); border-color: var(--thomas); }
+  .post-card[data-account="Justin"] { background: var(--justin-bg); border-color: var(--justin); }
+  .post-card[data-account="Herman"] { background: var(--herman-bg); border-color: var(--herman); }
+  .post-card[data-account="Manisha"] { background: var(--manisha-bg); border-color: var(--manisha); }
+  .post-card[data-account="Company"] { background: var(--company-bg); border-color: var(--company); }
+
+  .platform-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .platform-badge.x { background: #1DA1F2; color: #fff; }
+  .platform-badge.linkedin { background: #0A66C2; color: #fff; }
+
+  .post-idea {
+    font-weight: 500;
+    color: var(--text);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  /* ── Quick Notes Bar ── */
+  .notes-bar {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 12px 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    bottom: 0;
+  }
+  .notes-bar label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .notes-input {
+    flex: 1;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .notes-input:focus { border-color: var(--accent); }
+  .notes-input::placeholder { color: var(--text-muted); }
+  .notes-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    max-width: 50%;
+    padding: 4px 0;
+  }
+  .note-chip {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .note-chip .remove {
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1;
+  }
+  .note-chip .remove:hover { color: var(--company); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 560px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-header h3 { font-size: 16px; font-weight: 600; }
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close:hover { background: var(--border); }
+  .modal-body { padding: 20px 24px; }
+  .modal-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .modal-tag {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .modal-tag.account-Thomas { background: var(--thomas-bg); color: var(--thomas); }
+  .modal-tag.account-Justin { background: var(--justin-bg); color: var(--justin); }
+  .modal-tag.account-Herman { background: var(--herman-bg); color: var(--herman); }
+  .modal-tag.account-Manisha { background: var(--manisha-bg); color: var(--manisha); }
+  .modal-tag.account-Company { background: var(--company-bg); color: var(--company); }
+  .modal-tag.platform-x { background: rgba(29,161,242,0.15); color: #1DA1F2; }
+  .modal-tag.platform-linkedin { background: rgba(10,102,194,0.15); color: #0A66C2; }
+  .modal-tag.status { background: rgba(108,99,255,0.12); color: var(--accent-light); }
+  .modal-section { margin-bottom: 16px; }
+  .modal-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .modal-idea {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .modal-caption {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    background: var(--surface2);
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .modal-caption-empty {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .calendar-grid { font-size: 11px; }
+    .day-cell { min-height: 80px; padding: 4px; }
+    .post-card { font-size: 10px; padding: 3px 5px; }
+    .filters, .month-nav, .notes-bar, .calendar-container { padding-left: 12px; padding-right: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="logo">Lantern AI <span class="logo-sub">Content Calendar</span></div>
+    </div>
+  </div>
+  <div class="header-right">
+    <label for="file-input" class="btn btn-primary" style="cursor:pointer;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Upload Excel
+    </label>
+    <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none">
+  </div>
+</div>
+
+<!-- Upload Screen -->
+<div class="upload-screen" id="upload-screen">
+  <div class="upload-zone" id="upload-zone">
+    <div class="upload-icon">&#128197;</div>
+    <div class="upload-title">Drop your Content Calendar here</div>
+    <div class="upload-sub">or click to browse — accepts .xlsx files</div>
+  </div>
+</div>
+
+<!-- App -->
+<div class="app" id="app">
+  <!-- Month Nav -->
+  <div class="month-nav">
+    <div class="month-controls">
+      <button class="nav-btn" id="prev-month">&#8249;</button>
+    </div>
+    <h2 id="month-title">August 2026</h2>
+    <div class="month-controls">
+      <button class="nav-btn" id="next-month">&#8250;</button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-chip active" data-account="all" onclick="toggleFilter(this,'account')">All Accounts</div>
+    <div class="filter-chip" data-account="Thomas" onclick="toggleFilter(this,'account')">Thomas</div>
+    <div class="filter-chip" data-account="Justin" onclick="toggleFilter(this,'account')">Justin</div>
+    <div class="filter-chip" data-account="Herman" onclick="toggleFilter(this,'account')">Herman</div>
+    <div class="filter-chip" data-account="Manisha" onclick="toggleFilter(this,'account')">Manisha</div>
+    <div class="filter-chip" data-account="Company" onclick="toggleFilter(this,'account')">Company</div>
+    <div class="filter-divider"></div>
+    <div class="filter-chip active" data-platform="all" onclick="toggleFilter(this,'platform')">All Platforms</div>
+    <div class="filter-chip" data-platform="X" onclick="toggleFilter(this,'platform')">X</div>
+    <div class="filter-chip" data-platform="LinkedIn" onclick="toggleFilter(this,'platform')">LinkedIn</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <!-- Calendar -->
+  <div class="calendar-container">
+    <div class="calendar-grid" id="calendar-grid"></div>
+  </div>
+
+  <!-- Quick Notes -->
+  <div class="notes-bar">
+    <label>Quick Notes</label>
+    <input class="notes-input" id="notes-input" placeholder="Type a note and press Enter..." onkeydown="if(event.key==='Enter')addNote()">
+    <button class="btn" onclick="addNote()">Add</button>
+    <div class="notes-list" id="notes-list"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-date">Post Details</h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+let calendarData = [];
+let quickNotes = JSON.parse(localStorage.getItem('cc-notes') || '[]');
+let currentMonth = 7;
+let currentYear = 2026;
+let activeFilters = { account: 'all', platform: 'all' };
+
+const fileInput = document.getElementById('file-input');
+const uploadZone = document.getElementById('upload-zone');
+
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  handleFile(e.dataTransfer.files[0]);
+});
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const raw = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    calendarData = raw.map(row => {
+      let dateVal = row['Date'] || row['date'] || '';
+      if (dateVal instanceof Date) {}
+      else if (typeof dateVal === 'number') { dateVal = new Date((dateVal - 25569) * 86400000); }
+      else if (typeof dateVal === 'string' && dateVal) { dateVal = new Date(dateVal); }
+
+      return {
+        date: dateVal instanceof Date && !isNaN(dateVal) ? dateVal : null,
+        platform: (row['Platform'] || row['platform'] || '').toString().trim(),
+        account: (row['Account'] || row['account'] || '').toString().trim(),
+        idea: (row['Idea / Topic'] || row['Idea/Topic'] || row['idea'] || row['Topic'] || '').toString().trim(),
+        caption: (row['Full Caption'] || row['Caption'] || row['caption'] || '').toString().trim(),
+        status: (row['Status'] || row['status'] || '').toString().trim()
+      };
+    }).filter(r => r.date && (r.idea || r.caption));
+
+    if (calendarData.length > 0) {
+      currentMonth = calendarData[0].date.getMonth();
+      currentYear = calendarData[0].date.getFullYear();
+    }
+
+    if (wb.SheetNames.includes('Quick Notes')) {
+      const ns = wb.Sheets['Quick Notes'];
+      XLSX.utils.sheet_to_json(ns, { defval: '' }).forEach(n => {
+        const text = (n['Note'] || '').toString().trim();
+        if (text && !quickNotes.includes(text)) quickNotes.push(text);
+      });
+      saveNotes();
+    }
+
+    document.getElementById('upload-screen').style.display = 'none';
+    document.getElementById('app').classList.add('active');
+    renderCalendar();
+    renderNotes();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('calendar-grid');
+  const title = document.getElementById('month-title');
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  title.textContent = monthNames[currentMonth] + ' ' + currentYear;
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const daysInPrev = new Date(currentYear, currentMonth, 0).getDate();
+  let html = dayNames.map(d => '<div class="day-header">' + d + '</div>').join('');
+  const today = new Date();
+  const isToday = (d) => d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+  for (let i = firstDay - 1; i >= 0; i--) { html += '<div class="day-cell other-month"><div class="day-number">' + (daysInPrev - i) + '</div></div>'; }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const todayClass = isToday(d) ? ' today' : '';
+    const posts = getPostsForDay(d);
+    html += '<div class="day-cell' + todayClass + '">';
+    html += '<div class="day-number">' + d + '</div>';
+    posts.forEach(p => {
+      const dataIdx = calendarData.indexOf(p);
+      const platClass = p.platform.toLowerCase() === 'linkedin' ? 'linkedin' : 'x';
+      const platLabel = p.platform.toLowerCase() === 'linkedin' ? 'Li' : 'X';
+      html += '<div class="post-card" data-account="' + p.account + '" data-idx="' + dataIdx + '" onclick="openModalByIdx(' + dataIdx + ')">';
+      html += '<span class="platform-badge ' + platClass + '">' + platLabel + '</span>';
+      html += '<span class="post-idea">' + escHtml(p.idea || p.caption.substring(0, 50)) + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  const totalCells = firstDay + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) { html += '<div class="day-cell other-month"><div class="day-number">' + i + '</div></div>'; }
+  grid.innerHTML = html;
+  updateStats();
+}
+
+function getPostsForDay(day) {
+  return calendarData.filter(p => {
+    if (!p.date) return false;
+    const d = p.date;
+    if (d.getMonth() !== currentMonth || d.getFullYear() !== currentYear || d.getDate() !== day) return false;
+    if (activeFilters.account !== 'all' && p.account !== activeFilters.account) return false;
+    if (activeFilters.platform !== 'all' && p.platform.toLowerCase() !== activeFilters.platform.toLowerCase()) return false;
+    return true;
+  });
+}
+
+function updateStats() {
+  const monthPosts = calendarData.filter(p => p.date && p.date.getMonth() === currentMonth && p.date.getFullYear() === currentYear);
+  let html = '<div class="stat-item">Total: <span>' + monthPosts.length + '</span> posts</div>';
+  html += '<div class="stat-item">X: <span>' + monthPosts.filter(p => p.platform.toLowerCase() === 'x').length + '</span></div>';
+  html += '<div class="stat-item">LinkedIn: <span>' + monthPosts.filter(p => p.platform.toLowerCase() === 'linkedin').length + '</span></div>';
+  const accounts = {};
+  monthPosts.forEach(p => { accounts[p.account] = (accounts[p.account] || 0) + 1; });
+  Object.entries(accounts).sort((a,b) => b[1]-a[1]).forEach(([name, count]) => {
+    html += '<div class="stat-item">' + name + ': <span>' + count + '</span></div>';
+  });
+  document.getElementById('stats-bar').innerHTML = html;
+}
+
+function toggleFilter(el, type) {
+  activeFilters[type] = el.dataset[type];
+  document.querySelectorAll('.filter-chip[data-' + type + ']').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderCalendar();
+}
+
+document.getElementById('prev-month').addEventListener('click', () => { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); });
+document.getElementById('next-month').addEventListener('click', () => { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); });
+
+function openModalByIdx(idx) { openModal(calendarData[idx]); }
+
+function openModal(post) {
+  const overlay = document.getElementById('modal-overlay');
+  document.getElementById('modal-date').textContent = post.date ? new Date(post.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
+  const platClass = post.platform.toLowerCase() === 'linkedin' ? 'platform-linkedin' : 'platform-x';
+  let html = '<div class="modal-meta">';
+  html += '<span class="modal-tag account-' + post.account + '">' + post.account + '</span>';
+  html += '<span class="modal-tag ' + platClass + '">' + post.platform + '</span>';
+  if (post.status) html += '<span class="modal-tag status">' + post.status + '</span>';
+  html += '</div>';
+  if (post.idea) html += '<div class="modal-section"><div class="modal-label">Idea / Topic</div><div class="modal-idea">' + escHtml(post.idea) + '</div></div>';
+  html += '<div class="modal-section"><div class="modal-label">Full Caption</div>';
+  html += post.caption ? '<div class="modal-caption">' + escHtml(post.caption) + '</div>' : '<div class="modal-caption-empty">No caption written yet</div>';
+  html += '</div>';
+  document.getElementById('modal-body').innerHTML = html;
+  overlay.classList.add('active');
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('active'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function addNote() {
+  const input = document.getElementById('notes-input');
+  const text = input.value.trim();
+  if (!text) return;
+  quickNotes.push(text);
+  saveNotes();
+  renderNotes();
+  input.value = '';
+}
+function removeNote(idx) { quickNotes.splice(idx, 1); saveNotes(); renderNotes(); }
+function saveNotes() { localStorage.setItem('cc-notes', JSON.stringify(quickNotes)); }
+function renderNotes() {
+  document.getElementById('notes-list').innerHTML = quickNotes.map((n, i) => '<div class="note-chip">' + escHtml(n) + ' <span class="remove" onclick="removeNote(' + i + ')">&times;</span></div>').join('');
+}
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+renderNotes();
+</script>
+</body>
+</html>
