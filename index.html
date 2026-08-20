@@ -25,14 +25,9 @@
     --herman-bg: rgba(59,130,246,0.12);
     --manisha-bg: rgba(236,72,153,0.12);
     --company-bg: rgba(239,68,68,0.12);
-    --x-color: #000000;
-    --x-bg: rgba(0,0,0,0.25);
-    --li-color: #0A66C2;
-    --li-bg: rgba(10,102,194,0.15);
-    --draft-color: #8B8FA3;
-    --ready-color: #10B981;
-    --scheduled-color: #F59E0B;
-    --posted-color: #3B82F6;
+    --x-color: #000; --x-bg: rgba(0,0,0,0.25);
+    --li-color: #0A66C2; --li-bg: rgba(10,102,194,0.15);
+    --draft-color: #8B8FA3; --ready-color: #10B981; --scheduled-color: #F59E0B; --posted-color: #3B82F6;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
@@ -40,18 +35,30 @@
   .header-left { display: flex; align-items: center; gap: 16px; }
   .logo { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, var(--accent), #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
   .logo-sub { font-size: 12px; color: var(--text-muted); font-weight: 400; }
-  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 13px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
   .btn:hover { background: var(--border); }
   .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn-primary:hover { background: var(--accent-light); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
   .upload-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(100vh - 65px); gap: 24px; }
   .upload-zone { width: 480px; padding: 60px 40px; border: 2px dashed var(--border); border-radius: 16px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface); }
   .upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); background: rgba(108,99,255,0.05); }
   .upload-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.6; }
   .upload-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
   .upload-sub { font-size: 13px; color: var(--text-muted); }
-  .upload-actions { margin-top: 20px; display: flex; gap: 12px; justify-content: center; }
+  .divider-text { color: var(--text-muted); font-size: 13px; font-weight: 500; }
+  .gsheet-section { margin-top: 8px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .gsheet-input { width: 420px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 13px; outline: none; }
+  .gsheet-input:focus { border-color: var(--accent); }
+  .gsheet-input::placeholder { color: var(--text-muted); }
+  .gsheet-hint { font-size: 11px; color: var(--text-muted); max-width: 420px; text-align: center; line-height: 1.5; }
+  .gsheet-status { font-size: 12px; padding: 4px 12px; border-radius: 6px; }
+  .gsheet-status.success { background: rgba(16,185,129,0.15); color: var(--ready-color); }
+  .gsheet-status.error { background: rgba(239,68,68,0.15); color: var(--company); }
+  .gsheet-status.loading { background: rgba(108,99,255,0.12); color: var(--accent-light); }
+  .connected-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ready-color); }
+  .connected-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ready-color); }
   .app { display: none; }
   .app.active { display: flex; flex-direction: column; min-height: calc(100vh - 65px); }
   .month-nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px; background: var(--surface); border-bottom: 1px solid var(--border); }
@@ -106,7 +113,7 @@
   .post-idea { font-weight: 500; color: var(--text); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   .notes-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 12px 32px; display: flex; align-items: center; gap: 12px; position: sticky; bottom: 0; }
   .notes-bar label { font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
-  .notes-input { flex: 1; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 13px; outline: none; transition: border-color 0.15s; }
+  .notes-input { flex: 1; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 13px; outline: none; }
   .notes-input:focus { border-color: var(--accent); }
   .notes-input::placeholder { color: var(--text-muted); }
   .notes-list { display: flex; gap: 8px; overflow-x: auto; max-width: 50%; padding: 4px 0; }
@@ -150,6 +157,9 @@
 <div class="header">
   <div class="header-left"><div><div class="logo">Lantern AI <span class="logo-sub">Content Calendar</span></div></div></div>
   <div class="header-right">
+    <span id="header-connected" class="connected-badge" style="display:none"><span class="dot"></span>Google Sheet linked</span>
+    <button id="header-refresh" class="btn btn-sm" onclick="refreshFromSheet()" style="display:none">Refresh</button>
+    <button id="header-disconnect" class="btn btn-sm" onclick="disconnectSheet()" style="display:none">Disconnect</button>
     <button class="btn" onclick="downloadTemplate()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Template</button>
     <label for="file-input" class="btn btn-primary" style="cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload Excel</label>
     <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none">
@@ -161,14 +171,16 @@
     <div class="upload-title">Drop your Content Calendar here</div>
     <div class="upload-sub">or click to browse — accepts .xlsx files</div>
   </div>
-  <div class="upload-actions"><button class="btn" onclick="downloadTemplate()">Don't have a template? Download one</button></div>
+  <div class="divider-text">— or connect a Google Sheet —</div>
+  <div class="gsheet-section">
+    <input class="gsheet-input" id="gsheet-url" placeholder="Paste your Google Sheet link here..." onkeydown="if(event.key==='Enter')connectSheet()">
+    <button class="btn btn-primary" onclick="connectSheet()">Connect Google Sheet</button>
+    <div class="gsheet-hint">Open your Google Sheet → File → Share → Publish to web → select CSV → Publish. Then paste the link here.</div>
+    <div id="gsheet-status"></div>
+  </div>
 </div>
 <div class="app" id="app">
-  <div class="month-nav">
-    <div class="month-controls"><button class="nav-btn" id="prev-month">&#8249;</button></div>
-    <h2 id="month-title">August 2026</h2>
-    <div class="month-controls"><button class="nav-btn" id="next-month">&#8250;</button></div>
-  </div>
+  <div class="month-nav"><div class="month-controls"><button class="nav-btn" id="prev-month">&#8249;</button></div><h2 id="month-title">August 2026</h2><div class="month-controls"><button class="nav-btn" id="next-month">&#8250;</button></div></div>
   <div class="filters">
     <div class="filter-chip active" data-account="all" onclick="toggleFilter(this,'account')">All Accounts</div>
     <div class="filter-chip" data-account="Thomas" onclick="toggleFilter(this,'account')">Thomas</div>
@@ -189,176 +201,43 @@
   </div>
   <div class="stats-bar" id="stats-bar"></div>
   <div class="calendar-container"><div class="calendar-grid" id="calendar-grid"></div></div>
-  <div class="notes-bar">
-    <label>Quick Notes</label>
-    <input class="notes-input" id="notes-input" placeholder="Type a note and press Enter..." onkeydown="if(event.key==='Enter')addNote()">
-    <button class="btn" onclick="addNote()">Add</button>
-    <div class="notes-list" id="notes-list"></div>
-  </div>
+  <div class="notes-bar"><label>Quick Notes</label><input class="notes-input" id="notes-input" placeholder="Type a note and press Enter..." onkeydown="if(event.key==='Enter')addNote()"><button class="btn" onclick="addNote()">Add</button><div class="notes-list" id="notes-list"></div></div>
 </div>
-<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-header"><h3 id="modal-date">Post Details</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
-    <div class="modal-body" id="modal-body"></div>
-  </div>
-</div>
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-header"><h3 id="modal-date">Post Details</h3><button class="modal-close" onclick="closeModal()">&times;</button></div><div class="modal-body" id="modal-body"></div></div></div>
 <script>
-let calendarData = [];
-let quickNotes = JSON.parse(localStorage.getItem('cc-notes') || '[]');
-let currentMonth = 7;
-let currentYear = 2026;
-let activeFilters = { account: 'all', platform: 'all', status: 'all' };
-const fileInput = document.getElementById('file-input');
-const uploadZone = document.getElementById('upload-zone');
-fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-uploadZone.addEventListener('click', () => fileInput.click());
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
-function handleFile(file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const raw = XLSX.utils.sheet_to_json(ws, { defval: '' });
-    calendarData = raw.map(row => {
-      let dateVal = row['Date'] || row['date'] || '';
-      if (dateVal instanceof Date) {}
-      else if (typeof dateVal === 'number') { dateVal = new Date((dateVal - 25569) * 86400000); }
-      else if (typeof dateVal === 'string' && dateVal) { dateVal = new Date(dateVal); }
-      return {
-        date: dateVal instanceof Date && !isNaN(dateVal) ? dateVal : null,
-        platform: (row['Platform'] || row['platform'] || '').toString().trim(),
-        account: (row['Account'] || row['account'] || '').toString().trim(),
-        idea: (row['Idea / Topic'] || row['Idea/Topic'] || row['idea'] || row['Topic'] || '').toString().trim(),
-        caption: (row['Full Caption'] || row['Caption'] || row['caption'] || '').toString().trim(),
-        status: (row['Status'] || row['status'] || '').toString().trim()
-      };
-    }).filter(r => r.date && (r.idea || r.caption));
-    if (calendarData.length > 0) { currentMonth = calendarData[0].date.getMonth(); currentYear = calendarData[0].date.getFullYear(); }
-    if (wb.SheetNames.includes('Quick Notes')) {
-      XLSX.utils.sheet_to_json(wb.Sheets['Quick Notes'], { defval: '' }).forEach(n => {
-        const text = (n['Note'] || '').toString().trim();
-        if (text && !quickNotes.includes(text)) quickNotes.push(text);
-      });
-      saveNotes();
-    }
-    document.getElementById('upload-screen').style.display = 'none';
-    document.getElementById('app').classList.add('active');
-    renderCalendar(); renderNotes();
-  };
-  reader.readAsArrayBuffer(file);
-}
-function renderCalendar() {
-  const grid = document.getElementById('calendar-grid');
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  document.getElementById('month-title').textContent = monthNames[currentMonth] + ' ' + currentYear;
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const daysInPrev = new Date(currentYear, currentMonth, 0).getDate();
-  let html = dayNames.map(d => '<div class="day-header">' + d + '</div>').join('');
-  const today = new Date();
-  const isToday = d => d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
-  for (let i = firstDay - 1; i >= 0; i--) html += '<div class="day-cell other-month"><div class="day-number">' + (daysInPrev - i) + '</div></div>';
-  for (let d = 1; d <= daysInMonth; d++) {
-    html += '<div class="day-cell' + (isToday(d) ? ' today' : '') + '">';
-    html += '<div class="day-number">' + d + '</div>';
-    getPostsForDay(d).forEach(p => {
-      const idx = calendarData.indexOf(p);
-      const pc = p.platform.toLowerCase() === 'linkedin' ? 'linkedin' : 'x';
-      const pl = p.platform.toLowerCase() === 'linkedin' ? 'Li' : 'X';
-      const sc = (p.status || 'draft').toLowerCase();
-      html += '<div class="post-card" data-account="' + p.account + '" onclick="openModalByIdx(' + idx + ')">';
-      html += '<span class="platform-badge ' + pc + '">' + pl + '</span>';
-      html += '<span class="post-idea">' + escHtml(p.idea || p.caption.substring(0, 50)) + '</span>';
-      html += '<span class="status-dot ' + sc + '" title="' + (p.status || 'Draft') + '"></span>';
-      html += '</div>';
-    });
-    html += '</div>';
-  }
-  const rem = (firstDay + daysInMonth) % 7 === 0 ? 0 : 7 - ((firstDay + daysInMonth) % 7);
-  for (let i = 1; i <= rem; i++) html += '<div class="day-cell other-month"><div class="day-number">' + i + '</div></div>';
-  grid.innerHTML = html;
-  updateStats();
-}
-function getPostsForDay(day) {
-  return calendarData.filter(p => {
-    if (!p.date) return false;
-    if (p.date.getMonth() !== currentMonth || p.date.getFullYear() !== currentYear || p.date.getDate() !== day) return false;
-    if (activeFilters.account !== 'all' && p.account !== activeFilters.account) return false;
-    if (activeFilters.platform !== 'all' && p.platform.toLowerCase() !== activeFilters.platform.toLowerCase()) return false;
-    if (activeFilters.status !== 'all' && p.status !== activeFilters.status) return false;
-    return true;
-  });
-}
-function updateStats() {
-  const mp = calendarData.filter(p => p.date && p.date.getMonth() === currentMonth && p.date.getFullYear() === currentYear);
-  let html = '<div class="stat-item">Total: <span>' + mp.length + '</span> posts</div>';
-  html += '<div class="stat-item">X: <span>' + mp.filter(p => p.platform.toLowerCase() === 'x').length + '</span></div>';
-  html += '<div class="stat-item">LinkedIn: <span>' + mp.filter(p => p.platform.toLowerCase() === 'linkedin').length + '</span></div>';
-  const acc = {}; mp.forEach(p => { acc[p.account] = (acc[p.account] || 0) + 1; });
-  Object.entries(acc).sort((a,b) => b[1]-a[1]).forEach(([n, c]) => { html += '<div class="stat-item">' + n + ': <span>' + c + '</span></div>'; });
-  document.getElementById('stats-bar').innerHTML = html;
-}
-function toggleFilter(el, type) {
-  activeFilters[type] = el.dataset[type];
-  document.querySelectorAll('.filter-chip[data-' + type + ']').forEach(c => c.classList.remove('active'));
-  el.classList.add('active'); renderCalendar();
-}
-document.getElementById('prev-month').addEventListener('click', () => { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); });
-document.getElementById('next-month').addEventListener('click', () => { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); });
-function openModalByIdx(idx) { openModal(calendarData[idx]); }
-function openModal(post) {
-  document.getElementById('modal-date').textContent = post.date ? new Date(post.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
-  const pc = post.platform.toLowerCase() === 'linkedin' ? 'platform-linkedin' : 'platform-x';
-  let html = '<div class="modal-meta">';
-  html += '<span class="modal-tag account-' + post.account + '">' + post.account + '</span>';
-  html += '<span class="modal-tag ' + pc + '">' + post.platform + '</span>';
-  if (post.status) html += '<span class="modal-tag status-' + post.status + '">' + post.status + '</span>';
-  html += '</div>';
-  if (post.idea) html += '<div class="modal-section"><div class="modal-label">Idea / Topic</div><div class="modal-idea">' + escHtml(post.idea) + '</div></div>';
-  html += '<div class="modal-section"><div class="modal-label">Full Caption</div>';
-  html += post.caption ? '<div class="modal-caption">' + escHtml(post.caption) + '</div>' : '<div class="modal-caption-empty">No caption written yet</div>';
-  html += '</div>';
-  document.getElementById('modal-body').innerHTML = html;
-  document.getElementById('modal-overlay').classList.add('active');
-}
-function closeModal() { document.getElementById('modal-overlay').classList.remove('active'); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-function addNote() { const input = document.getElementById('notes-input'); const text = input.value.trim(); if (!text) return; quickNotes.push(text); saveNotes(); renderNotes(); input.value = ''; }
-function removeNote(idx) { quickNotes.splice(idx, 1); saveNotes(); renderNotes(); }
-function saveNotes() { localStorage.setItem('cc-notes', JSON.stringify(quickNotes)); }
-function renderNotes() { document.getElementById('notes-list').innerHTML = quickNotes.map((n, i) => '<div class="note-chip">' + escHtml(n) + ' <span class="remove" onclick="removeNote(' + i + ')">&times;</span></div>').join(''); }
-function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-function downloadTemplate() {
-  const wb = XLSX.utils.book_new();
-  const headers = ['Date', 'Month', 'Platform', 'Account', 'Idea / Topic', 'Full Caption', 'Status'];
-  const rows = [headers];
-  const now = new Date();
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  for (let m = 0; m < 2; m++) {
-    const mo = (now.getMonth() + m) % 12;
-    const yr = now.getFullYear() + Math.floor((now.getMonth() + m) / 12);
-    const days = new Date(yr, mo + 1, 0).getDate();
-    for (let d = 1; d <= days; d++) {
-      const dt = new Date(yr, mo, d);
-      rows.push([dt.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }), monthNames[mo], '', '', '', '', '']);
-    }
-  }
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{ wch: 14 }, { wch: 10 }, { wch: 12 }, { wch: 14 }, { wch: 40 }, { wch: 60 }, { wch: 10 }];
-  XLSX.utils.book_append_sheet(wb, ws, 'Content Calendar');
-  const nws = XLSX.utils.aoa_to_sheet([['Date', 'Author', 'Note']]);
-  nws['!cols'] = [{ wch: 18 }, { wch: 15 }, { wch: 60 }];
-  XLSX.utils.book_append_sheet(wb, nws, 'Quick Notes');
-  const lrows = [['Account', 'Color', 'Notes'], ['Thomas', 'Purple', '@onethomaschan'], ['Justin', 'Orange', ''], ['Herman', 'Blue', ''], ['Manisha', 'Pink', ''], ['Company', 'Red', 'Lantern AI official'], [], ['Platform = X or LinkedIn'], ['Account = Thomas, Justin, Herman, Manisha, Company'], ['Status = Draft, Ready, Scheduled, Posted']];
-  const lws = XLSX.utils.aoa_to_sheet(lrows);
-  lws['!cols'] = [{ wch: 15 }, { wch: 15 }, { wch: 40 }];
-  XLSX.utils.book_append_sheet(wb, lws, 'Legend');
-  XLSX.writeFile(wb, 'Content-Calendar.xlsx');
-}
+let calendarData=[], quickNotes=JSON.parse(localStorage.getItem('cc-notes')||'[]'), currentMonth=7, currentYear=2026, activeFilters={account:'all',platform:'all',status:'all'};
+const fileInput=document.getElementById('file-input'), uploadZone=document.getElementById('upload-zone');
+fileInput.addEventListener('change',e=>handleFile(e.target.files[0]));
+uploadZone.addEventListener('click',()=>fileInput.click());
+uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('drag-over');});
+uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop',e=>{e.preventDefault();uploadZone.classList.remove('drag-over');handleFile(e.dataTransfer.files[0]);});
+function handleFile(file){if(!file)return;const reader=new FileReader();reader.onload=e=>{const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];const raw=XLSX.utils.sheet_to_json(ws,{defval:''});calendarData=raw.map(row=>{let dv=row['Date']||row['date']||'';if(dv instanceof Date){}else if(typeof dv==='number'){dv=new Date((dv-25569)*86400000);}else if(typeof dv==='string'&&dv){dv=new Date(dv);}return{date:dv instanceof Date&&!isNaN(dv)?dv:null,platform:(row['Platform']||row['platform']||'').toString().trim(),account:(row['Account']||row['account']||'').toString().trim(),idea:(row['Idea / Topic']||row['Idea/Topic']||row['idea']||row['Topic']||'').toString().trim(),caption:(row['Full Caption']||row['Caption']||row['caption']||'').toString().trim(),status:(row['Status']||row['status']||'').toString().trim()};}).filter(r=>r.date&&(r.idea||r.caption));if(calendarData.length>0){currentMonth=calendarData[0].date.getMonth();currentYear=calendarData[0].date.getFullYear();}if(wb.SheetNames.includes('Quick Notes')){XLSX.utils.sheet_to_json(wb.Sheets['Quick Notes'],{defval:''}).forEach(n=>{const t=(n['Note']||'').toString().trim();if(t&&!quickNotes.includes(t))quickNotes.push(t);});saveNotes();}document.getElementById('upload-screen').style.display='none';document.getElementById('app').classList.add('active');renderCalendar();renderNotes();};reader.readAsArrayBuffer(file);}
+function renderCalendar(){const grid=document.getElementById('calendar-grid');const mn=['January','February','March','April','May','June','July','August','September','October','November','December'];const dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];document.getElementById('month-title').textContent=mn[currentMonth]+' '+currentYear;const fd=new Date(currentYear,currentMonth,1).getDay();const dim=new Date(currentYear,currentMonth+1,0).getDate();const dip=new Date(currentYear,currentMonth,0).getDate();let h=dn.map(d=>'<div class="day-header">'+d+'<\/div>').join('');const td=new Date();const isT=d=>d===td.getDate()&&currentMonth===td.getMonth()&&currentYear===td.getFullYear();for(let i=fd-1;i>=0;i--)h+='<div class="day-cell other-month"><div class="day-number">'+(dip-i)+'<\/div><\/div>';for(let d=1;d<=dim;d++){h+='<div class="day-cell'+(isT(d)?' today':'')+'">';h+='<div class="day-number">'+d+'<\/div>';getPostsForDay(d).forEach(p=>{const idx=calendarData.indexOf(p);const pc=p.platform.toLowerCase()==='linkedin'?'linkedin':'x';const pl=p.platform.toLowerCase()==='linkedin'?'Li':'X';const sc=(p.status||'draft').toLowerCase();h+='<div class="post-card" data-account="'+p.account+'" onclick="openModalByIdx('+idx+')">';h+='<span class="platform-badge '+pc+'">'+pl+'<\/span>';h+='<span class="post-idea">'+escHtml(p.idea||p.caption.substring(0,50))+'<\/span>';h+='<span class="status-dot '+sc+'" title="'+(p.status||'Draft')+'"><\/span>';h+='<\/div>';});h+='<\/div>';}const rem=(fd+dim)%7===0?0:7-((fd+dim)%7);for(let i=1;i<=rem;i++)h+='<div class="day-cell other-month"><div class="day-number">'+i+'<\/div><\/div>';grid.innerHTML=h;updateStats();}
+function getPostsForDay(day){return calendarData.filter(p=>{if(!p.date)return false;if(p.date.getMonth()!==currentMonth||p.date.getFullYear()!==currentYear||p.date.getDate()!==day)return false;if(activeFilters.account!=='all'&&p.account!==activeFilters.account)return false;if(activeFilters.platform!=='all'&&p.platform.toLowerCase()!==activeFilters.platform.toLowerCase())return false;if(activeFilters.status!=='all'&&p.status!==activeFilters.status)return false;return true;});}
+function updateStats(){const mp=calendarData.filter(p=>p.date&&p.date.getMonth()===currentMonth&&p.date.getFullYear()===currentYear);let h='<div class="stat-item">Total: <span>'+mp.length+'<\/span> posts<\/div>';h+='<div class="stat-item">X: <span>'+mp.filter(p=>p.platform.toLowerCase()==='x').length+'<\/span><\/div>';h+='<div class="stat-item">LinkedIn: <span>'+mp.filter(p=>p.platform.toLowerCase()==='linkedin').length+'<\/span><\/div>';const ac={};mp.forEach(p=>{ac[p.account]=(ac[p.account]||0)+1;});Object.entries(ac).sort((a,b)=>b[1]-a[1]).forEach(([n,c])=>{h+='<div class="stat-item">'+n+': <span>'+c+'<\/span><\/div>';});document.getElementById('stats-bar').innerHTML=h;}
+function toggleFilter(el,type){activeFilters[type]=el.dataset[type];document.querySelectorAll('.filter-chip[data-'+type+']').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderCalendar();}
+document.getElementById('prev-month').addEventListener('click',()=>{currentMonth--;if(currentMonth<0){currentMonth=11;currentYear--;}renderCalendar();});
+document.getElementById('next-month').addEventListener('click',()=>{currentMonth++;if(currentMonth>11){currentMonth=0;currentYear++;}renderCalendar();});
+function openModalByIdx(idx){openModal(calendarData[idx]);}
+function openModal(post){document.getElementById('modal-date').textContent=post.date?new Date(post.date).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}):'';const pc=post.platform.toLowerCase()==='linkedin'?'platform-linkedin':'platform-x';let h='<div class="modal-meta">';h+='<span class="modal-tag account-'+post.account+'">'+post.account+'<\/span>';h+='<span class="modal-tag '+pc+'">'+post.platform+'<\/span>';if(post.status)h+='<span class="modal-tag status-'+post.status+'">'+post.status+'<\/span>';h+='<\/div>';if(post.idea)h+='<div class="modal-section"><div class="modal-label">Idea / Topic<\/div><div class="modal-idea">'+escHtml(post.idea)+'<\/div><\/div>';h+='<div class="modal-section"><div class="modal-label">Full Caption<\/div>';h+=post.caption?'<div class="modal-caption">'+escHtml(post.caption)+'<\/div>':'<div class="modal-caption-empty">No caption written yet<\/div>';h+='<\/div>';document.getElementById('modal-body').innerHTML=h;document.getElementById('modal-overlay').classList.add('active');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('active');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+function addNote(){const input=document.getElementById('notes-input');const t=input.value.trim();if(!t)return;quickNotes.push(t);saveNotes();renderNotes();input.value='';}
+function removeNote(idx){quickNotes.splice(idx,1);saveNotes();renderNotes();}
+function saveNotes(){localStorage.setItem('cc-notes',JSON.stringify(quickNotes));}
+function renderNotes(){document.getElementById('notes-list').innerHTML=quickNotes.map((n,i)=>'<div class="note-chip">'+escHtml(n)+' <span class="remove" onclick="removeNote('+i+')">&times;<\/span><\/div>').join('');}
+function escHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function downloadTemplate(){const wb=XLSX.utils.book_new();const headers=['Date','Month','Platform','Account','Idea / Topic','Full Caption','Status'];const rows=[headers];const now=new Date();const mn=['January','February','March','April','May','June','July','August','September','October','November','December'];for(let m=0;m<2;m++){const mo=(now.getMonth()+m)%12;const yr=now.getFullYear()+Math.floor((now.getMonth()+m)/12);const days=new Date(yr,mo+1,0).getDate();for(let d=1;d<=days;d++){const dt=new Date(yr,mo,d);rows.push([dt.toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'}),mn[mo],'','','','','']);}}const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:14},{wch:10},{wch:12},{wch:14},{wch:40},{wch:60},{wch:10}];XLSX.utils.book_append_sheet(wb,ws,'Content Calendar');const nws=XLSX.utils.aoa_to_sheet([['Date','Author','Note']]);nws['!cols']=[{wch:18},{wch:15},{wch:60}];XLSX.utils.book_append_sheet(wb,nws,'Quick Notes');const lrows=[['Account','Color','Notes'],['Thomas','Purple','@onethomaschan'],['Justin','Orange',''],['Herman','Blue',''],['Manisha','Pink',''],['Company','Red','Lantern AI official'],[],['Platform = X or LinkedIn'],['Account = Thomas, Justin, Herman, Manisha, Company'],['Status = Draft, Ready, Scheduled, Posted']];const lws=XLSX.utils.aoa_to_sheet(lrows);lws['!cols']=[{wch:15},{wch:15},{wch:40}];XLSX.utils.book_append_sheet(wb,lws,'Legend');XLSX.writeFile(wb,'Content-Calendar.xlsx');}
+function extractSheetId(url){const m=url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);if(m)return m[1];return null;}
+function buildCsvUrl(url){if(url.includes('output=csv')||url.includes('format=csv'))return url;const id=extractSheetId(url);if(id)return 'https://docs.google.com/spreadsheets/d/'+id+'/export?format=csv&gid=0';return url;}
+function parseCSV(text){const rows=[];let cur='',inQ=false,row=[];for(let i=0;i<text.length;i++){const ch=text[i];if(inQ){if(ch==='"'&&text[i+1]==='"'){cur+='"';i++;}else if(ch==='"'){inQ=false;}else{cur+=ch;}}else{if(ch==='"'){inQ=true;}else if(ch===','){row.push(cur.trim());cur='';}else if(ch==='\n'||(ch==='\r'&&text[i+1]==='\n')){row.push(cur.trim());cur='';if(row.length>1||row[0]!=='')rows.push(row);row=[];if(ch==='\r')i++;}else{cur+=ch;}}}if(cur||row.length){row.push(cur.trim());rows.push(row);}return rows;}
+function csvToCalendarData(rows){if(rows.length<2)return[];const hd=rows[0].map(h=>h.toLowerCase().trim());const di=hd.findIndex(h=>h==='date');const pi=hd.findIndex(h=>h==='platform');const ai=hd.findIndex(h=>h==='account');const ii=hd.findIndex(h=>h.includes('idea')||h.includes('topic'));const ci=hd.findIndex(h=>h.includes('caption')||h.includes('full'));const si=hd.findIndex(h=>h==='status');return rows.slice(1).map(r=>{let dv=r[di]||'';if(dv)dv=new Date(dv);return{date:dv instanceof Date&&!isNaN(dv)?dv:null,platform:(r[pi]||'').trim(),account:(r[ai]||'').trim(),idea:(r[ii]||'').trim(),caption:(r[ci]||'').trim(),status:(r[si]||'').trim()};}).filter(r=>r.date&&(r.idea||r.caption));}
+async function connectSheet(){const urlInput=document.getElementById('gsheet-url');const statusEl=document.getElementById('gsheet-status');const url=urlInput.value.trim();if(!url)return;statusEl.innerHTML='<span class="gsheet-status loading">Connecting...<\/span>';try{const csvUrl=buildCsvUrl(url);const resp=await fetch(csvUrl);if(!resp.ok)throw new Error('Could not fetch sheet. Make sure it is published to the web.');const text=await resp.text();const rows=parseCSV(text);const data=csvToCalendarData(rows);if(data.length===0)throw new Error('No valid rows found. Check column headers.');calendarData=data;if(calendarData.length>0){currentMonth=calendarData[0].date.getMonth();currentYear=calendarData[0].date.getFullYear();}localStorage.setItem('cc-gsheet-url',url);localStorage.setItem('cc-gsheet-csv',csvUrl);statusEl.innerHTML='<span class="gsheet-status success">Connected! '+data.length+' posts loaded.<\/span>';document.getElementById('upload-screen').style.display='none';document.getElementById('app').classList.add('active');showSheetControls(true);renderCalendar();renderNotes();}catch(e){statusEl.innerHTML='<span class="gsheet-status error">'+escHtml(e.message)+'<\/span>';}}
+async function refreshFromSheet(){const csvUrl=localStorage.getItem('cc-gsheet-csv');if(!csvUrl)return;const btn=document.getElementById('header-refresh');btn.textContent='Refreshing...';btn.disabled=true;try{const resp=await fetch(csvUrl+'&_t='+Date.now());if(!resp.ok)throw new Error('Fetch failed');const text=await resp.text();calendarData=csvToCalendarData(parseCSV(text));renderCalendar();btn.textContent='Refreshed!';setTimeout(()=>{btn.textContent='Refresh';btn.disabled=false;},1500);}catch(e){btn.textContent='Error';setTimeout(()=>{btn.textContent='Refresh';btn.disabled=false;},2000);}}
+function disconnectSheet(){localStorage.removeItem('cc-gsheet-url');localStorage.removeItem('cc-gsheet-csv');calendarData=[];showSheetControls(false);document.getElementById('upload-screen').style.display='';document.getElementById('app').classList.remove('active');}
+function showSheetControls(show){document.getElementById('header-connected').style.display=show?'flex':'none';document.getElementById('header-refresh').style.display=show?'':'none';document.getElementById('header-disconnect').style.display=show?'':'none';}
+(async function(){const savedUrl=localStorage.getItem('cc-gsheet-csv');if(savedUrl){try{const resp=await fetch(savedUrl+'&_t='+Date.now());if(!resp.ok)throw new Error('fail');const text=await resp.text();const data=csvToCalendarData(parseCSV(text));if(data.length>0){calendarData=data;currentMonth=data[0].date.getMonth();currentYear=data[0].date.getFullYear();document.getElementById('upload-screen').style.display='none';document.getElementById('app').classList.add('active');showSheetControls(true);renderCalendar();}}catch(e){}}})();
 renderNotes();
 </script>
 </body>
